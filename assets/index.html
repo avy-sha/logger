@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Joule Logger Config</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<script src="./js/jq.js"></script>
+<script >
+	function findGetParameter(parameterName) {
+		var result = null,
+		    tmp = [];
+		location.search
+		    .substr(1)
+		    .split("&")
+		    .forEach(function(item) {
+			    tmp = item.split("=");
+			    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+		    });
+		return result;
+	}
+	window.onload = function() {
+		var id = findGetParameter("valid");
+		if (id) {
+			document.getElementById("tooltip").removeAttribute("hidden");
+			setTimeout(function() {
+				document.getElementById("tooltip").setAttribute("hidden", "true");
+			}, 3000)
+		}
+
+	};
+
+	var newOptions0 = {"Carrier": "0",
+		"Mcquay": "1",
+		"Hitachi": "2",
+		"Trane": "3"
+	};
+	var newOptions1 = {"Danfoss": "0",
+		"Fuji": "1"
+	};
+	var newOptions2 = {"NF29": "0"
+	};
+
+    $( document ).ready(function() {
+	    // Handler for .ready() called.
+	    var comm = $('#comm');
+	    comm.change(function () {
+	        $('#driver option:gt(0)').remove();
+	        var $el = $("#driver");
+
+	        if ($(this).val() == "chl") {
+
+			    $.each(newOptions0, function (key, value) {
+				    $el.append($("<option></option>")
+				        .attr("value", value).text(key));
+			    });
+
+		    }
+		    else if ($(this).val() == "vfd") {
+
+	            $.each(newOptions1, function (key, value) {
+		            $el.append($("<option></option>")
+			          .attr("value", value).text(key));
+	            });
+
+		    }
+		    else if ($(this).val() == "em") {
+
+	            $.each(newOptions2, function (key, value) {
+		            $el.append($("<option></option>")
+			          .attr("value", value).    text(key));
+	            });
+
+		    }
+	    });
+	    var $slaves = $("#slaves");
+	    $("#tab2").click(function(){
+	        $slaves.empty();
+		    $.get("/api/delete", function(data, status){
+		    	console.log(data);
+		    	for(var i=0;i<data.length;i++){
+		    		var dev="deleteSlave("+data[i].slaveId+")";
+			    $slaves.append($("<button></button>")
+			        .attr({"value":data[i].slaveId,"onclick":dev,"id":"delete"}).text("slaveId:"+data[i].slaveId+"\tCommCategory:"+data[i].commCategory))
+                }
+		    });
+	    });
+
+    });
+
+    function openfun(actions) {
+	    var i;
+	    var x = document.getElementsByClassName("add");
+	    for (i = 0; i < x.length; i++) {
+		    x[i].style.display = "none";
+	    }
+	    document.getElementById('add').style.display = "block";
+    }
+
+    function deleteSlave(id){
+    	console.log(id);
+    	var deletelink="/api/delete/"+id;
+	    $.post(deletelink, function() {
+		    console.log("successfully deleted slave with id:"+id);
+	        var $slaves = $("#slaves");
+	        $slaves.empty();
+	        $.get("/api/delete", function(data, status){
+		        console.log(data);
+		        for(var i=0;i<data.length;i++){
+			        var dev="deleteSlave("+data[i].slaveId+")";
+			        $slaves.append($("<button></button>")
+				      .attr({"value":data[i].slaveId,"onclick":dev,"id":"delete"}   ).text("slaveId:"+data[i].slaveId+"\tCommCategory:"+data[i].commCategory))
+		        }
+	        });
+	    })
+        }
+
+</script>
+
+<body>
+<div class="header">
+    <label class="title"><strong>Joule Logger Config</strong></label>
+</div>
+<div class="w3-bar w3-black" class="buttons">
+
+
+        <a class="w3-bar-item w3-button" id="tab1" href="#tabAdd">Add Slave</a>
+
+    <a class="w3-bar-item w3-button" id="tab2" href="#tabDelete">Delete Slave</a>
+
+</div>
+
+<div id="add" class="addSlave" id="tabAdd">
+    <form action="/api/save" method="POST" id="form">
+        <input type="text" id="slave" name="slaveId" placeholder="SlaveID" required="true">
+        <div>
+            <select required name="comm" id="comm" class="dropbtn" required="true">
+                <option value="" disabled selected>Comm Category</option>
+                <option value="chl">Chiller</option>
+                <option value="vfd">VFD</option>
+                <option value="em">Energy Meter</option>
+            </select>
+        </div>
+        <div>
+            <select required name="driver" id="driver" class="dropbtn" required="true">
+                <option value="" disabled selected>Driver Type</option>
+            </select>
+        </div>
+        <input type="submit" id="submit">
+    </form>
+
+<!--div>
+    <button id="clear" onclick="clear()">Clear Configuration Data</button>
+</div-->
+<div id="tooltip" hidden="true">
+    Device Successfully Added!!
+</div>
+
+</div>
+
+<h3>Select a slave to delete with the slaveId:</h3>
+    <div  name="slaves" id="slaves" >
+
+    </div>
+
+</body>
+</html>

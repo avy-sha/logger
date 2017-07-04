@@ -1,0 +1,1 @@
+{"deviceId":"1","deviceName":"JouleLogger 1","siteId":1,"modbus":[{"slaveId":"1","commCategory":"chl","driverType":"1"},{"slaveId":"1","commCategory":"chl","driverType":"0"},{"slaveId":"7","commCategory":"em","driverType":"0"},{"slaveId":"8","commCategory":"chl","driverType":"1"}]}
